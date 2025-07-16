@@ -36,7 +36,7 @@ Before you run this script, ensure you have:
 
 1.  **Clone the Repository:**
     ```bash
-    git clone [https://github.com/upmcplanetracker/28crashtracker.git](https://github.com/upmcplanetracker/28crashtracker.git)
+    git clone https://github.com/upmcplanetracker/28crashtracker.git 28crashtracker
     cd 28crashtracker
     ```
 
