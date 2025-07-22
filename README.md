@@ -33,7 +33,7 @@ To get started with 28CrashTracker, you'll need Python 3 and a few libraries.
     First, clone this repository to your local machine:
 
     ```bash
-    git clone [https://github.com/upmcplanetracker/28crashtracker.git](https://github.com/upmcplanetracker/28crashtracker.git)
+    git clone https://github.com/upmcplanetracker/28crashtracker.git
     cd 28crashtracker
     ```
 
@@ -216,4 +216,4 @@ The license for this project can be found on my GitHub page at [LICENSE](https:/
 
 ## Contributing
 
-Contributions are welcome! If you have suggestions for improvements, bug fixes, or new features, please open an issue or submit a pull request on the [GitHub repository](https://github.com/upmcplanetracker/28crashtracker).  API calls cost money.  [Buy me a coffee] (https://buymeacoffee.com/pghcrash).
+Contributions are welcome! If you have suggestions for improvements, bug fixes, or new features, please open an issue or submit a pull request on the [GitHub repository](https://github.com/upmcplanetracker/28crashtracker).  API calls cost money.  [Buy me a coffee](https://buymeacoffee.com/pghcrash).
