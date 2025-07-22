@@ -216,4 +216,4 @@ The license for this project can be found on my GitHub page at [LICENSE](https:/
 
 ## Contributing
 
-Contributions are welcome! If you have suggestions for improvements, bug fixes, or new features, please open an issue or submit a pull request on the [GitHub repository](https://github.com/upmcplanetracker/28crashtracker).
+Contributions are welcome! If you have suggestions for improvements, bug fixes, or new features, please open an issue or submit a pull request on the [GitHub repository](https://github.com/upmcplanetracker/28crashtracker).  API calls cost money.  [Buy me a coffee] (https://buymeacoffee.com/pghcrash).
