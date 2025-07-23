@@ -24,6 +24,7 @@ Welcome to 28CrashTracker! This script monitors traffic incidents along specific
 * Avoids posting duplicate incidents based on proximity and time.
 * Uses a history of prompts to vary post messages.
 * Purges old incident data to keep the tracking efficient.
+* Provides a monthly summary report of all of the crashes reported on in the script and attached a .gif of your choice from your script directory to the monthly Bluesky post.
 
 ## Installation
 
@@ -64,7 +65,7 @@ This script uses a `.env` file for sensitive information and user-configurable s
 1.  **Create the file:** In the root directory of your cloned repository, create a new file named `.env`.
 
     ```bash
-    touch .env
+    sudo nano .env
     ```
 
 2.  **Add necessary variables:** Populate the `.env` file with the variables described in the [User Controllable Settings](#user-controllable-settings) section, along with your API keys.
@@ -76,6 +77,7 @@ This script uses a `.env` file for sensitive information and user-configurable s
     BLUESKY_APP_PASSWORD="your_bluesky_app_password"
     RAPIDAPI_KEY="YOUR_RAPIDAPI_KEY_HERE"
     OPENCAGE_API_KEY="YOUR_OPENCAGE_API_KEY_HERE"
+    MONTHLY_REPORT_GIF_PATH = "your_chosen_gif_here.gif"
     ```
 
 ## API Services and Costs
