@@ -516,7 +516,7 @@ def check_route_28():
             if alert.get("type") == "ACCIDENT":
                 street = alert.get("street") or ""
                 if (re.search(r'\b(ROUTE|RT|US|STATE ROUTE|PA)[ -]?28\b', street, re.IGNORECASE) or \
-                   ("28" in street and "228" not in street and "128" not in street and "328" not in street and "428" not in street and "528" not in street)) and \
+                   ("28" in street and "228" not in street and "128" not in street and "328" not in street and "428" not in street and "528" not in street and "286" not in street)) and \
                    ("BUS" not in street.upper()):
 
                     if alert_id in current_run_processed_alert_ids:
@@ -577,3 +577,4 @@ if __name__ == "__main__":
         handle_monthly_reset_and_report()
         check_route_28()
     logging.info(f"Script finished at {datetime.now()}")
+
