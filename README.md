@@ -1,6 +1,6 @@
-# 28CrashTracker
+# Pittsburgh Combined Crash Watcher
 
-Welcome to 28CrashTracker! This script monitors traffic incidents along specific road segments, primarily Route 28 in the Pittsburgh area, and posts updates to Bluesky. It's designed to be easily configurable for your own needs.
+Welcome! This script monitors traffic incidents along multiple, configurable road systems in the Pittsburgh area, specifically Route 28 and the Parkway East. It classifies incidents by road and posts distinct updates to dedicated Bluesky accounts for each.
 
 ## Table of Contents
 
@@ -10,207 +10,187 @@ Welcome to 28CrashTracker! This script monitors traffic incidents along specific
 - [API Services and Costs](#api-services-and-costs)
 - [Running the Script](#running-the-script)
 - [User Controllable Settings](#user-controllable-settings)
-- [Customizing Road Segments and Bounding Box](#customizing-road-segments-and-bounding-box)
+- [Customizing for New Roads](#customizing-for-new-roads)
 - [License](#license)
 - [Contributing](#contributing)
 
 ## Features
 
-* Monitors Waze traffic alerts for accidents.
-* Focuses on configurable road names (e.g., "Route 28", "SR-28").
-* Utilizes a geographical bounding box to narrow down the search area.
-* Posts new and unique accident alerts to Bluesky.
+* Monitors a combined geographical area for Waze traffic alerts.
+* Classifies accidents to specific roadways (e.g., "Route 28", "Parkway East") using regular expressions.
+* Posts new and unique accident alerts to **separate, dedicated Bluesky accounts** for each road.
 * Includes retry logic for API calls to improve robustness.
 * Avoids posting duplicate incidents based on proximity and time.
-* Uses a history of prompts to vary post messages.
-* Purges old incident data to keep the tracking efficient.
-* Provides a monthly summary report of all of the crashes reported on in the script and attached a .gif of your choice from your script directory to the monthly Bluesky post.
+* Uses a unique history of prompts for each road to vary post messages.
+* Purges old incident data to keep tracking efficient.
+* Generates and posts **separate monthly summary reports** for each monitored road, with an optional unique GIF attached to each.
 
 ## Installation
 
-To get started with 28CrashTracker, you'll need Python 3 and a few libraries.
+To get started, you'll need Python 3 and a few libraries.
 
 1.  **Clone the Repository:**
     First, clone this repository to your local machine:
-
     ```bash
-    git clone https://github.com/upmcplanetracker/28crashtracker.git
+    git clone [https://github.com/upmcplanetracker/28crashtracker.git](https://github.com/upmcplanetracker/28crashtracker.git)
     cd 28crashtracker
     ```
 
 2.  **Install Python Dependencies:**
-    It's highly recommended to use a virtual environment to manage dependencies.
-
+    It's highly recommended to use a virtual environment.
     ```bash
     python3 -m venv venv
     source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
     pip install -r requirements.txt
     ```
-
-    * **Note:** The `crash.py` script uses `requests`, `json`, `os`, `random`, `datetime`, `atproto`, `geopy`, `dotenv`, `zoneinfo`, `time`, `logging`, and `sys`. You will need to create a `requirements.txt` file containing these dependencies if it's not already present in your repository. You can generate it by running `pip freeze > requirements.txt` after manually installing them, or just list them directly:
-        ```
-        requests
-        atproto
-        geopy
-        python-dotenv
-        ```
-        *Self-correction: Based on the `crash.py` content, `json`, `os`, `random`, `datetime`, `zoneinfo`, `time`, `logging`, `sys` are standard library modules and do not need to be listed in `requirements.txt`.*
+    If a `requirements.txt` file is not available, you can create one with the following content and then run `pip install -r requirements.txt`:
+    ```
+    requests
+    atproto
+    geopy
+    python-dotenv
+    ```
 
 ## Configuration (.env file)
 
-This script uses a `.env` file for sensitive information and user-configurable settings.
+This script uses a single `.env` file to manage credentials and settings for all monitored roads.
 
-### Creating the `.env` file
-
-1.  **Create the file:** In the root directory of your cloned repository, create a new file named `.env`.
-
+1.  **Create the file:** In the root directory of your project, create a new file named `.env`.
     ```bash
     sudo nano .env
     ```
 
-2.  **Add necessary variables:** Populate the `.env` file with the variables described in the [User Controllable Settings](#user-controllable-settings) section, along with your API keys.
+2.  **Add necessary variables:** Populate the `.env` file with the variables for **each** road system you are tracking, along with your general API keys.
 
-    Example `.env` file:
-
+    **Example `.env` file for Route 28 and Parkway East:**
     ```
-    BLUESKY_HANDLE="your_bluesky_handle.bsky.social"
-    BLUESKY_APP_PASSWORD="your_bluesky_app_password"
+    # --- Bluesky Credentials for Route 28 ---
+    BLUESKY_HANDLE_ROUTE28="your_route28_handle.bsky.social"
+    BLUESKY_APP_PASSWORD_ROUTE28="your_route28_app_password"
+    MONTHLY_STATS_GIF_ROUTE28="path/to/your/route28.gif"
+
+    # --- Bluesky Credentials for Parkway East ---
+    BLUESKY_HANDLE_PARKWAYEAST="your_parkway_handle.bsky.social"
+    BLUESKY_APP_PASSWORD_PARKWAYEAST="your_parkway_app_password"
+    MONTHLY_STATS_GIF_PARKWAYEAST="path/to/your/parkway.gif"
+
+    # --- General API Keys ---
     RAPIDAPI_KEY="YOUR_RAPIDAPI_KEY_HERE"
     OPENCAGE_API_KEY="YOUR_OPENCAGE_API_KEY_HERE"
-    MONTHLY_REPORT_GIF_PATH = "your_chosen_gif_here.gif"
     ```
 
 ## API Services and Costs
 
-This script relies on external API services, primarily through RapidAPI for Waze data, and geocoding services.
+This script relies on external API services for traffic and location data.
 
 ### 1. RapidAPI (Waze Alerts)
 
-This is the primary service used to fetch traffic incident data.
+This is the primary service used to fetch traffic data.
 
-1.  **Sign Up:**
-    To obtain an API key, you need to sign up for an account on RapidAPI: [https://rapidapi.com/](https://rapidapi.com/)
+1.  **Sign Up:** Create an account on [RapidAPI](https://rapidapi.com/).
+2.  **Find the API:** Search for the "Waze" API on the platform. The script is configured for the endpoint `waze.p.rapidapi.com`. Subscribe to a suitable plan.
+3.  **API Key:** Your API key will be available in your RapidAPI dashboard. Place this in your `.env` file as `RAPIDAPI_KEY`.
+4.  **Cost:** Pricing can vary. A common plan is approximately **$25 for 10,000 API calls**. Please verify the current pricing on the RapidAPI platform.
 
-2.  **Find the API:**
-    Once signed up, search for the "Waze" API or a similar "Traffic Incident API" that provides Waze data. Subscribe to a suitable plan. The `crash.py` script uses `waze.p.rapidapi.com`.
+### 2. OpenCage Geocoding (Optional, but Recommended)
 
-3.  **API Key:**
-    After subscribing, your API key will be available in your RapidAPI dashboard. This is the key you will place in your `.env` file under `RAPIDAPI_KEY`.
+This is a fallback service for converting coordinates to a city name if the primary service (Nominatim) fails.
 
-4.  **Cost:**
-    The cost for API calls via RapidAPI can vary depending on the provider and plan. A common pricing model is approximately **$25 for 10,000 API calls**. Please verify the exact pricing on the RapidAPI platform for the specific API you are using, as this can change.
-
-### 2. OpenCage Geocoding (Optional, but Recommended Failover)
-
-This service is used as a failover for reverse geocoding (converting coordinates to a city name) if Nominatim fails.
-
-1.  **Sign Up:**
-    Visit the OpenCage Data website: [https://opencagedata.com/](https://opencagedata.com/) and sign up for an account.
-
-2.  **API Key:**
-    After signing up, you will find your API key in your OpenCage dashboard. Add this key to your `.env` file as `OPENCAGE_API_KEY`.
-    *Note: If `OPENCAGE_API_KEY` is not provided in your `.env` file, the script will log a warning, and OpenCage geocoding will not be available as a failover.*
+1.  **Sign Up:** Visit the [OpenCage Data website](https://opencagedata.com/) and sign up for an account.
+2.  **API Key:** Find your API key in your OpenCage dashboard. Add this key to your `.env` file as `OPENCAGE_API_KEY`. If this key is not provided, the script will still run but without the geocoding failover capability.
 
 ## Running the Script
 
-The script is designed to be run periodically to check for new incidents. A common way to automate this on Linux/macOS systems is using `cron`.
-
-### Running with `crontab`
+The script is intended to be run periodically. Using `cron` on Linux/macOS is an effective way to automate this.
 
 1.  **Open Crontab Editor:**
-    Open your crontab file for editing:
-
     ```bash
     crontab -e
     ```
 
 2.  **Add a Cron Job:**
-    Add a line to your crontab file to execute the script every 10 minutes. This frequency should help you stay under the 10,000 API calls per month limit (10,000 calls / (30 days * 24 hours * 6 calls/hour) $\approx$ 5.7 minutes per call, so 10 minutes is a safe interval).
+    Add a line to execute the script at your desired frequency. Running it every 10 minutes is a safe interval to stay within a 10,000 calls/month limit.
 
     ```cron
-    */10 * * * * /usr/bin/python3 /path/to/your/28crashtracker/crash.py >> /path/to/your/28crashtracker/cron.log 2>&1
+    */10 * * * * /path/to/your/venv/bin/python3 /path/to/your/28crashtracker/combinedcrash.py >> /path/to/your/28crashtracker/cron.log 2>&1
     ```
 
     **Important:**
-    * Replace `/usr/bin/python3` with the absolute path to your Python interpreter (you can find this by running `which python3` or `where python3` in your virtual environment if you activated it, or the system-wide path).
-    * Replace `/path/to/your/28crashtracker/crash.py` with the absolute path to your script's main entry point (in this case, `crash.py`).
-    * The `>> /path/to/your/28crashtracker/cron.log 2>&1` part redirects all output (stdout and stderr) to a log file, which is helpful for debugging. The script also writes to `route28_watcher.log`.
-
-3.  **Save and Exit:**
-    Save the crontab file and exit the editor. The cron job will now be scheduled.
+    * Replace `/path/to/your/venv/bin/python3` with the absolute path to the Python interpreter **inside your virtual environment**.
+    * Replace `/path/to/your/28crashtracker/combinedcrash.py` with the absolute path to the script.
+    * The `>> ...` portion redirects all output to a log file for debugging. The script also writes to `combined_crash_watcher.log` by default.
 
 ## User Controllable Settings
 
-These settings can be modified in your `.env` file to customize the script's behavior.
+### Settings in `.env` file:
 
-* **`BLUESKY_HANDLE`**: Your Bluesky handle (e.g., `your_name.bsky.social`).
-    * **What it does:** Used to log into your Bluesky account for posting.
-    * **How to change:** Set to your Bluesky handle.
+* **`BLUESKY_HANDLE_[ROAD]`**: Your Bluesky handle for a specific road (e.g., `BLUESKY_HANDLE_ROUTE28`).
+* **`BLUESKY_APP_PASSWORD_[ROAD]`**: The Bluesky app password for that account. **(Do NOT use your main password)**.
+* **`MONTHLY_REPORT_GIF_PATH_[ROAD]`**: The local file path to a GIF you want to attach to the monthly report for that road.
+* **`RAPIDAPI_KEY`**: Your API key for the Waze service on RapidAPI.
+* **`OPENCAGE_API_KEY`**: Your optional API key from OpenCage Data for geocoding failover.
 
-* **`BLUESKY_APP_PASSWORD`**: Your Bluesky app password. **(Highly Recommended: Do NOT use your main account password)**
-    * **What it does:** Used to authenticate your Bluesky client.
-    * **How to change:** Generate an app password from your Bluesky settings and set it here.
+### Settings inside `combinedcrash.py`:
 
-* **`RAPIDAPI_KEY`**: Your API key obtained from RapidAPI for the Waze alerts.
-    * **What it does:** Authenticates your requests to the RapidAPI Waze service.
-    * **How to change:** Replace `"YOUR_RAPIDAPI_KEY_HERE"` with your actual API key.
+These constants can be modified directly within the script for fine-tuning.
 
-* **`OPENCAGE_API_KEY`**: Your API key obtained from OpenCage Data for geocoding failover.
-    * **What it does:** Provides a fallback geocoding service if Nominatim fails to resolve coordinates to a city name.
-    * **How to change:** Replace `"YOUR_OPENCAGE_API_KEY_HERE"` with your actual API key. (Optional, but recommended)
+* `PURGE_THRESHOLD_HOURS`: How long (in hours) to keep a crash in the `seen_crashes` file before purging. Default: `24`.
+* `DUPLICATE_DISTANCE_KM`: Maximum distance (in km) between two incidents to be considered a duplicate. Default: `1`.
+* `DUPLICATE_TIME_MINUTES`: Maximum time difference (in minutes) for two incidents to be considered a duplicate. Default: `45`.
+* `MAX_WAZE_API_RETRIES`: Number of times to retry fetching from the Waze API on failure. Default: `4`.
+* `MAX_RECENT_PROMPTS`: How many recent post openings to remember to avoid repetition for each bot. Default: `12`.
 
-* **`PURGE_THRESHOLD_HOURS`** (Internal constant in `crash.py`): The age in hours after which old crash entries are purged from the `seen_crashes.json` file.
-    * **What it does:** Helps keep the `seen_crashes.json` file from growing indefinitely and prevents redundant duplicate checks on very old incidents.
-    * **How to change:** Modify the `PURGE_THRESHOLD_HOURS` variable directly in `crash.py`. Default is `24` hours.
+## Customizing for New Roads
 
-* **`DUPLICATE_DISTANCE_KM`** (Internal constant in `crash.py`): The maximum distance in kilometers for two incidents to be considered duplicates.
-    * **What it does:** Prevents the script from posting multiple times about the same incident if reports come in from slightly different coordinates.
-    * **How to change:** Modify the `DUPLICATE_DISTANCE_KM` variable directly in `crash.py`. Default is `1` km.
+To adapt the script to monitor new roads or regions, you'll need to modify `combinedcrash.py` in three places:
 
-* **`DUPLICATE_TIME_MINUTES`** (Internal constant in `crash.py`): The maximum time difference in minutes for two incidents to be considered duplicates.
-    * **What it does:** Works with `DUPLICATE_DISTANCE_KM` to define what constitutes a duplicate incident. An incident is a duplicate if it's within this time window *and* within the distance threshold of a previously seen incident.
-    * **How to change:** Modify the `DUPLICATE_TIME_MINUTES` variable directly in `crash.py`. Default is `45` minutes.
-
-* **`MAX_WAZE_API_RETRIES`** (Internal constant in `crash.py`): Maximum number of retries for Waze API calls in case of temporary failures.
-    * **What it does:** Improves script robustness by retrying failed API requests with exponential backoff.
-    * **How to change:** Modify the `MAX_WAZE_API_RETRIES` variable directly in `crash.py`. Default is `4` retries.
-
-* **`MAX_RECENT_PROMPTS`** (Internal constant in `crash.py`): The number of recently used introductory prompts to avoid.
-    * **What it does:** Ensures that the script cycles through a variety of opening phrases for new posts, preventing repetitive messaging.
-    * **How to change:** Modify the `MAX_RECENT_PROMPTS` variable directly in `crash.py`. Default is `12`.
-
-## Customizing Road Segments and Bounding Box
-
-The script is currently hardcoded to monitor specific roads and geographical areas relevant to Route 28 in Pittsburgh. If you wish to adapt this script for different roads or regions, you'll need to adjust two key areas directly within `crash.py`:
-
-1.  **`ROUTE28_BOXES` coordinates:**
-    This variable defines the geographical bounding box (or boxes) where the script will search for incidents. The current values are:
-
+1.  **Define a Combined Bounding Box:**
+    Adjust the `COMBINED_BOUNDING_BOX` dictionary to encompass all geographic areas you want to monitor.
     ```python
-    ROUTE28_BOXES = [
-        {
-            'bottom': 40.450, 'top': 40.700, 'left': -80.050, 'right': -79.600
+    COMBINED_BOUNDING_BOX = {
+        'bottom': 40.400, 'top': 40.750, 'left': -80.300, 'right': -79.550
+    }
+    ```
+    You can use an online tool like [bboxfinder.com](https://bboxfinder.com/) to find the coordinates for your desired region.
+
+2.  **Update the `classify_alert_by_road` function:**
+    Add logic to this function to recognize your new road from the street name provided by the Waze API. Use `re.search` for flexible pattern matching.
+    ```python
+    def classify_alert_by_road(alert):
+        street = alert.get("street") or ""
+        # ... existing logic for Route 28 and Parkway East
+        
+        # Add your new logic here
+        if re.search(r'\b(I-79|INTERSTATE 79)\b', street, re.IGNORECASE):
+            return "INTERSTATE79"
+            
+        return "UNKNOWN"
+    ```
+
+3.  **Add a Configuration Entry to `FILE_PATHS`:**
+    Add a new key-value pair to the `FILE_PATHS` dictionary for your new road. The key must match the string you return from `classify_alert_by_road` (e.g., `"INTERSTATE79"`).
+    ```python
+    FILE_PATHS = {
+        "ROUTE28": { ... },
+        "PARKWAYEAST": { ... },
+        "INTERSTATE79": {
+            "SEEN_FILE": "seen_crashes_i79.json",
+            "LAST_PROMPTS_FILE": "last_prompts_i79.json",
+            "MONTHLY_CRASH_FILE": "monthly_crash_data_i79.json",
+            "BLUESKY_HANDLE": os.getenv("BLUESKY_HANDLE_I79"),
+            "BLUESKY_APP_PASSWORD": os.getenv("BLUESKY_APP_PASSWORD_I79"),
+            "MONTHLY_REPORT_GIF_PATH": os.getenv("MONTHLY_STATS_GIF_I79"),
+            "PROMPTS": ["Oh boy, a crash on I-79...", "Another one on I-79."],
+            "REPORT_MESSAGE_TEMPLATE": (
+                "🚗 Monthly Crash Report for {reported_month_name} {reported_year}:\n"
+                "There were {total_crashes_last_month} car crashes on I-79.\n"
+                "#Pittsburgh #Traffic #I79"
+            ),
+            "EMOJIS": {"intro": "💥", "location": "📍", "reported_at": "⌚"}
         }
-    ]
+    }
     ```
-    * **How to change:**
-        * Edit the `ROUTE28_BOXES` list in `crash.py`. You can define multiple bounding boxes if your target area is not contiguous.
-        * Each dictionary in the list should contain `bottom` (min latitude), `top` (max latitude), `left` (min longitude), and `right` (max longitude).
-        * You can use online tools like [bboxfinder.com](https://bboxfinder.com/) to easily determine the latitude and longitude coordinates for your desired region.
-
-2.  **Road Name Filtering Logic:**
-    The script filters alerts to find incidents on "Route 28". The relevant lines are in the `check_route_28` function:
-
-    ```python
-    if ("28" in street and "228" not in street) and ("SR" in street or "Route" in street or "Hwy" in street or "PA" in street):
-    ```
-    * **How to change:**
-        * Modify this `if` statement to match the road names you are interested in.
-        * For example, if you want to track "SR-79" and "I-376", you might change it to:
-            ```python
-            if ("SR-79" in street or "I-376" in street):
-            ```
-        * Ensure that the road names you specify here accurately reflect how they appear in the data provided by the Waze API.
+    Finally, remember to add the corresponding `BLUESKY_HANDLE_I79`, `BLUESKY_APP_PASSWORD_I79`, and `MONTHLY_STATS_GIF_I79` variables to your `.env` file.
 
 ## License
 
@@ -218,4 +198,4 @@ The license for this project can be found on my GitHub page at [LICENSE](https:/
 
 ## Contributing
 
-Contributions are welcome! If you have suggestions for improvements, bug fixes, or new features, please open an issue or submit a pull request on the [GitHub repository](https://github.com/upmcplanetracker/28crashtracker).  API calls cost money.  [Buy me a coffee](https://buymeacoffee.com/pghcrash).
+Contributions are welcome! If you have suggestions, bug fixes, or new features, please open an issue or submit a pull request on the [GitHub repository](https://github.com/upmcplanetracker/28crashtracker). API calls cost money. [Buy me a coffee](https://buymeacoffee.com/pghcrash).
