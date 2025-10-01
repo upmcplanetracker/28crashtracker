@@ -32,7 +32,7 @@ To get started, you'll need Python 3 and a few libraries.
 1.  **Clone the Repository:**
     First, clone this repository to your local machine:
     ```bash
-    git clone [https://github.com/upmcplanetracker/28crashtracker.git](https://github.com/upmcplanetracker/28crashtracker.git)
+    git clone https://github.com/upmcplanetracker/28crashtracker.git
     cd 28crashtracker
     ```
 
